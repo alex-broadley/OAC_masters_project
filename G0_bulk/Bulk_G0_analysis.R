@@ -1,5 +1,5 @@
-###########
-### Try G0 arrest score:
+##### calculating G0 arrest scores for bulk tumours samples
+#then splits cohorts based on proportion of arrested cells in tumour
 library(readxl)
 
 setwd('/Users/alex/Documents/University/Year 4/BIOL0041/Code/BIOL0041')

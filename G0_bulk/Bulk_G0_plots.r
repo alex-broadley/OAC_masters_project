@@ -1,5 +1,4 @@
 ### BULK G0 arrest plots 
-
 library(ggplot2)
 library(ggpubr)
 
@@ -17,39 +16,29 @@ most_selected_type_plot <- function(dfname, point_size, font_size) {
   dfname$most_selected_score = 0
   dfname$most_selected_type = 0
   
-  print(names(dfname)[4:6])
-  
   #rename columns for nicer legend
   names(dfname)[4:6] = c('missense', 'nonsense', 'splice')
-  
-  
   
   for (i in 1:nrow(dfname)) {
     #initialise composite label variable- used for creating legend/labelling points
     composite_label = ""
     
-    
     #find which type of mutation is most strongly selected
     dfname$most_selected_score[i] = max(c(dfname$missense[i], dfname$nonsense[i], dfname$splice[i]))
-    
     
     #take subset of the dataframe for the calculations - fixes indexing issue when using 'which'
     df_for_calcs = dfname[,c('missense', 'nonsense', 'splice')]
     
-    
     #create label showing all the mutation types within (10 for now) of the highest selection score
     highest_selection_mutations = names(df_for_calcs[,c('missense', 'nonsense', 'splice')])[which(df_for_calcs[i, ] >= (dfname$most_selected_score[i]-10))]
     composite_label = paste(highest_selection_mutations, collapse = "-")
-    
     
     #adding this label to the row
     dfname$most_selected_type[i] = composite_label
   }
   
   #make sure the label is a factor to allow plotting
-  
   dfname$most_selected_type = as.factor(dfname$most_selected_type)
-  
   
   #create scatter plot, horizontal line indicates the p_value at which we decided the selection was significant
   print(head(dfname))
