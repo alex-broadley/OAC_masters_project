@@ -47,3 +47,8 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+#ignore data file as normally too big to push
+data/
+
+.DS_Store
