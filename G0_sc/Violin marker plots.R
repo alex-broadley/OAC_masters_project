@@ -1,30 +1,52 @@
 library(ggplot2)
+library(ggpubr)
+library(rstatix)
 
 setwd('/Users/alex/Documents/BIOL0041-Project/OAC_masters_project/data')
 
 tum_categories = read.csv('G0_scored_tumorCells.csv',row.names=1)
 tumor_counts = read.csv('tum_counts.csv', row.names = 1)
 
-fast_counts = tumor_counts[,which(colnames(tumor_counts) %in% tum_categories$Sample[which(tum_categories$strict_cycle_status == 'fast')])]
-G0_counts = tumor_counts[,which(colnames(tumor_counts) %in% tum_categories$Sample[which(tum_categories$strict_cycle_status == 'slow')])]
-slow_counts = tumor_counts[,which(colnames(tumor_counts) %in% tum_categories$Sample[which(tum_categories$strict_cycle_status == 'inter')])]
+#fast_counts = tumor_counts[,which(colnames(tumor_counts) %in% tum_categories$Sample[which(tum_categories$Cycle_type == 'fast')])]
+#G0_counts = tumor_counts[,which(colnames(tumor_counts) %in% tum_categories$Sample[which(tum_categories$Cycle_type == 'slow')])]
+#slow_counts = tumor_counts[,which(colnames(tumor_counts) %in% tum_categories$Sample[which(tum_categories$Cycle_type == 'inter')])]
+names(tum_categories)[7] = "Cycle_type"
 
 tumor_counts = t(tumor_counts)
-
-tumor_counts = merge(as.data.frame(tumor_counts), as.data.frame(tum_categories)$strict_cycle_status, key = row)
-tumor_counts$strict_cycle_status
-
 tumor_counts = merge(tumor_counts, tum_categories, by = 0) 
+table(tumor_counts$Cycle_type)
 
-tumor_counts[,'MKI67']
+tumor_counts$Cycle_type = gsub('slow', 'G0_arrested',tumor_counts$Cycle_type)
+tumor_counts$Cycle_type = gsub('inter', 'slow',tumor_counts$Cycle_type)
+table(tumor_counts$Cycle_type)
+
 rownames(tumor_counts) = tumor_counts$Row.names
 
-ggplot(tumor_counts, aes(x=strict_cycle_status, y=MKI67, fill = strict_cycle_status)) + 
+tumor_counts$Cycle_type = factor(tumor_counts$Cycle_type , levels=c("fast", "slow", "G0_arrested"))
+tumor_counts$Cycle_type
+
+my_comparisons = list(c("fast", "G0_arrested"), c("G0_arrested", 'slow'), c("fast", "slow"))
+
+stat.test <- tumor_counts %>% 
+  wilcox_test(MKI67 ~ Cycle_type, comparisons = my_comparisons) %>%
+  add_xy_position(x = "Cycle_type") %>%
+  mutate(myformatted.p = paste0("p = ", p))
+stat.test
+
+compare_means(MKI67 ~ Cycle_type,  data = tumor_counts)
+compare_means(TOP2A ~ Cycle_type,  data = tumor_counts)
+
+ggplot(tumor_counts, aes(x=Cycle_type, y=MKI67, fill = Cycle_type)) + 
   geom_violin() + 
+  stat_compare_means(comparisons = my_comparisons) +
+  stat_compare_means(label.y = 30) +
   scale_fill_manual(values=c("#b30000", "#9494b8", "#000080")) +
   theme_minimal()
 
-ggplot(tumor_counts, aes(x=strict_cycle_status, y=TOP2A, fill=strict_cycle_status)) + 
+ggplot(tumor_counts, aes(x=Cycle_type, y=TOP2A, fill=Cycle_type)) + 
   geom_violin() + 
+  stat_compare_means(comparisons = my_comparisons) +
+  stat_compare_means(label.y = 10) +
   scale_fill_manual(values=c("#b30000", "#9494b8", "#000080")) +
   theme_minimal()
+
