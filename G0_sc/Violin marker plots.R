@@ -4,7 +4,8 @@ library(rstatix)
 
 setwd('/Users/alex/Documents/BIOL0041-Project/OAC_masters_project/data')
 
-tum_categories = read.csv('G0_scored_tumorCells.csv',row.names=1)
+#tum_categories = read.csv('G0_scored_tumorCells.csv',row.names=1)
+tum_categories = read.csv('G0_scored_stringent.csv',row.names=1)
 tumor_counts = read.csv('tum_counts.csv', row.names = 1)
 
 #fast_counts = tumor_counts[,which(colnames(tumor_counts) %in% tum_categories$Sample[which(tum_categories$Cycle_type == 'fast')])]
@@ -16,16 +17,16 @@ tumor_counts = t(tumor_counts)
 tumor_counts = merge(tumor_counts, tum_categories, by = 0) 
 table(tumor_counts$Cycle_type)
 
-tumor_counts$Cycle_type = gsub('slow', 'G0_arrested',tumor_counts$Cycle_type)
-tumor_counts$Cycle_type = gsub('inter', 'slow',tumor_counts$Cycle_type)
-table(tumor_counts$Cycle_type)
+#tumor_counts$Cycle_type = gsub('slow', 'G0_arrested',tumor_counts$Cycle_type)
+#tumor_counts$Cycle_type = gsub('inter', 'slow',tumor_counts$Cycle_type)
+
 
 rownames(tumor_counts) = tumor_counts$Row.names
 
-tumor_counts$Cycle_type = factor(tumor_counts$Cycle_type , levels=c("fast", "slow", "G0_arrested"))
+tumor_counts$Cycle_type = factor(tumor_counts$Cycle_type , levels=c("fast cycling", "cycling", "G0 arrested"))
 tumor_counts$Cycle_type
 
-my_comparisons = list(c("fast", "G0_arrested"), c("G0_arrested", 'slow'), c("fast", "slow"))
+my_comparisons = list(c("fast cycling", "G0 arrested"), c("G0 arrested", 'cycling'), c("fast cycling", "cycling"))
 
 stat.test <- tumor_counts %>% 
   wilcox_test(MKI67 ~ Cycle_type, comparisons = my_comparisons) %>%
