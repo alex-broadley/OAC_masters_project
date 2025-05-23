@@ -7,6 +7,9 @@ setwd('/Users/alex/Documents/University/Year 4/BIOL0041/Code/BIOL0041')
 load("oac.expr.final.RData")
 load("mat.expr.RData")
 
+
+write.csv(mat.expr, "/Users/alex/Documents/BIOL0041-Project/OAC_masters_project/data/BULK_TUM_RNA.csv")
+
 mat.expr.oac <- mat.expr[,-1]
 mat.expr.oac <- as.matrix(mat.expr.oac)
 rownames(mat.expr.oac) <- mat.expr$DNAid
@@ -28,6 +31,12 @@ library(GSVA)
 gsvapar <- gsvaParam(t(mat.expr.oac), sigs, maxDiff=TRUE)
 
 ## estimate GSVA enrichment scores for the three sets
+
+#rownames do match genes in sig - not sure what error is 
+table(rownames(t(mat.expr.oac)) %in% sigs[[1]])
+table(rownames(t(mat.expr.oac)) %in% sigs[[2]])
+
+
 gsva_es <- gsva(gsvapar)
 rownames(gsva_es) <- c("G0.up","G0.down")
 mat.scores <- t(gsva_es)
@@ -75,7 +84,7 @@ slow_grow_samples = primaries.vcf[primaries.vcf$split_ID %in% slow_grow$DNAid,]
 test_match = primaries.vcf[primaries.vcf$split_ID2 %in% quick_grow$DNAid,]
 test_match = primaries.vcf[primaries.vcf$split_ID2 %in% slow_grow$DNAid,]
 
-# checking there aren't any non-primary tumour matches 
+# checking there aren't any non-primary tumor matches 
 test_match = barretts.vcf[barretts.vcf$split_ID %in% quick_grow$DNAid,]
 test_match = barretts.vcf[barretts.vcf$split_ID %in% slow_grow$DNAid,]
 
@@ -89,4 +98,79 @@ slow_grow_samples = slow_grow_samples[ , !(names(slow_grow_samples) %in% c('spli
 save(quick_grow_samples, file = 'quick_grow_primaries.vcf.RData')
 save(slow_grow_samples, file = 'slow_grow_primaries.vcf.RData')
 
+#GSVA not working again -> get slow/fast growing sample IDs from these files
+
+load('quick_grow_primaries.vcf.RData')
+load('slow_grow_primaries.vcf.RData')
+
+table(quick_grow_samples$split_ID %in% expr_df$DNAid)
+table(slow_grow_samples$split_ID %in% expr_df$DNAid)
+
+
+
+expr_df = as.data.frame(mat.expr)
+
+expr_df$proliferation <- ifelse(expr_df$DNAid %in% slow_grow_samples$split_ID, 
+                           "slow", 
+                           ifelse(expr_df$DNAid %in% quick_grow_samples$split_ID, 
+                                  "fast", 
+                                  NA))
+ncol(expr_df)
+
+expr_df <- expr_df[ , !(names(expr_df) %in% sigs[[1]])]
+expr_df <- expr_df[ , !(names(expr_df) %in% sigs[[2]])]
+
+ncol(expr_df)
+
+setwd("/Users/alex/Documents/BIOL0041-Project/OAC_masters_project/data")
+
+write.csv(expr_df, 'bulk_RNA_classified.csv', row.names = TRUE)
+
+
+####################### LOAD scores from python scoring
+
+bulk_scores = read.csv('/Users/alex/Documents/BIOL0041-Project/OAC_masters_project/data/BULK_PROLIF_SCORE.csv', row.names = 'X')
+
+names(bulk_scores)[1] = 'prolif_z'
+
+bulk_scores$prolif_z_scaled = scale(bulk_scores$prolif_z, center = T, scale = T)
+
+hist(bulk_scores$prolif_z_scaled)
+
+
+bulk_scores$Cycle_type = ""
+
+
+for (i in 1:nrow(bulk_scores)){
+  if (bulk_scores$prolif_z[i] >= 0) {
+    bulk_scores$Cycle_type[i] = 'Aggressive'
+  } else if (bulk_scores$prolif_z[i] <= 0) {
+    bulk_scores$Cycle_type[i] = 'Slowly proliferating'
+  }
+}
+
+
+
+ggplot(data = bulk_scores, aes(prolif_z_scaled, fill = Cycle_type)) +
+  scale_color_manual(values=c("#e60039", "#3366ff"))+
+  scale_fill_manual(values=c("#e60039", "#3366ff")) +
+  geom_histogram(breaks = c(seq(-2,3.5, 0.25)),color="black") +
+  scale_x_continuous(breaks = -2:3.5) +
+  theme_classic() +
+  theme(axis.text=element_text(size=15), 
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size=15),
+        axis.title.y = element_text(size=15),
+        axis.title.x = element_text(size = 15),
+        plot.title = element_text(hjust = 0.5, size = 20, face = 'bold'),
+        legend.text = element_text(size = 15),
+        legend.title = element_text(size = 15)) +
+  labs(
+    x = "Proliferative score",
+    y = "Counts",
+    title = "Primary tumor proliferative score distribution",
+    fill = 'Proliferation type'
+  )
+
+mean(bulk_scores$prolif_z_scaled)
 
