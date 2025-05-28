@@ -42,12 +42,6 @@ names(sigs)[2] = 'G0sig.down'
 
 # Calculate G0 scores ----------------------------------------------------------
 
-# only retain variable genes
-keep <- apply(tumor_scran_mat, 1, function(x) var(x, na.rm = T) > 0)
-tumor_scran_mat <- data.matrix(tumor_scran_mat[keep, ])
-
-
-
 library(GSVA)
 ## build GSVA parameter object
 gsvapar <- gsvaParam(tumor_scran_mat, sigs)
@@ -56,8 +50,6 @@ print(table(rownames(as.matrix(tumor_scran_mat)) %in% sigs[[1]]))
 print(table(rownames(as.matrix(tumor_scran_mat)) %in% sigs[[2]]))
 
 sigs[[2]] = sigs[[2]][sigs[[2]] %in% rownames(as.matrix(tumor_scran_mat))]
-
-## estimate GSVA enrichment scores for the three sets
 gsva_es <- gsva(gsvapar, verbose = TRUE) 
 
 rownames(gsva_es)
