@@ -5,7 +5,7 @@ library(survival)
 
 setwd("/Users/alex/Documents/BIOL0041-Project/OAC_masters_project/data")
 
-#adapted from Maria's analysis
+#adapted from Maria's code 
 
 
 # load bulk file w/ attached G0 classifications so can group patients by proliferation score

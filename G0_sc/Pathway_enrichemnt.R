@@ -102,7 +102,9 @@ GO_enrichment.scores <- escape.matrix(as.matrix(tum_counts),
                                    gene.sets = GO_sets, 
                                    method = 'ssGSEA',
                                    min.size = 5,
-                                   normalize = FALSE)
+                                   normalize = TRUE)
+
+G0_enrichment.scores = scale(GO_enrichment.scores)
 
 #merge scores with proliferation labels
 enrich_metadata = merge(GO_enrichment.scores, tum_categories, by = 0) 

@@ -44,6 +44,9 @@ mets_clean$chr <- gsub("chr","",as.vector(mets_clean$chr))
 #run dndscv to find selected genes
 dndsout_mets = dndscv(mets_clean, outp=3)
 
+temp = dndsout_mets$genemuts
+sum(temp$n_syn) + sum(temp$n_mis) + sum(temp$n_non) + sum(temp$n_spl)
+
 #extract gene names and associated statistics for all significantly positively selected genes
 sel_cv_mets = dndsout_mets$sel_cv
 signif_met_genes = sel_cv_mets[sel_cv_mets$qallsubs_cv<0.1, c("n_syn", "n_mis", "n_non", "n_spl", "gene_name","qallsubs_cv",

@@ -126,7 +126,7 @@ ggplot(data = mat.scores, aes(prolif_z, fill = Cycle_type)) +
   labs(
     x = "Proliferative score",
     y = "Counts",
-    title = "Tumor cell proliferative score distribution",
+    title = "Tumour cell proliferative score distribution",
     fill = 'Proliferation type'
   )
 

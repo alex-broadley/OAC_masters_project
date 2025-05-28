@@ -126,9 +126,9 @@ bulk_scores$Cycle_type = ""
 
 #classify based on score of 0
 for (i in 1:nrow(bulk_scores)){
-  if (bulk_scores$prolif_z[i] >= 0) {
+  if (bulk_scores$prolif_z_scaled[i] >= 0) {
     bulk_scores$Cycle_type[i] = 'Aggressive'
-  } else if (bulk_scores$prolif_z[i] <= 0) {
+  } else if (bulk_scores$prolif_z_scaled[i] <= 0) {
     bulk_scores$Cycle_type[i] = 'Slowly proliferating'
   }
 }
@@ -138,7 +138,7 @@ for (i in 1:nrow(bulk_scores)){
 ggplot(data = bulk_scores, aes(prolif_z_scaled, fill = Cycle_type)) +
   scale_color_manual(values=c("#e60039", "#3366ff"))+
   scale_fill_manual(values=c("#e60039", "#3366ff")) +
-  geom_histogram(breaks = c(seq(-2,3.5, 0.25)),color="black") +
+  geom_histogram(breaks = c(seq(-2.5,2, 0.25)),color="black") +
   scale_x_continuous(breaks = -2:3.5) +
   theme_classic() +
   theme(axis.text=element_text(size=15), 
@@ -152,7 +152,9 @@ ggplot(data = bulk_scores, aes(prolif_z_scaled, fill = Cycle_type)) +
   labs(
     x = "Proliferative score",
     y = "Counts",
-    title = "Primary tumor proliferative score distribution",
+    title = "Primary tumour proliferative score distribution",
     fill = 'Proliferation type'
   )
 
+setwd('/Users/alex/Documents/BIOL0041-Project/OAC_masters_project/data')
+test = read.csv('bulk_RNA_classified.csv')

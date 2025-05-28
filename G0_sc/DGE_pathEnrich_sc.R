@@ -1,6 +1,4 @@
 #Initialise packages
-library(DESeq2)
-library(vsn)
 library(ggplot2)
 library(ggrepel)
 library(RColorBrewer)
@@ -83,10 +81,11 @@ sc_volcano = ggplot(data = fast_G0_DE, aes(x = logfoldchanges, y = -log10(pvals_
   geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = 'dashed') +
   geom_hline(yintercept = -log10(0.05), col = "black", linetype = 'dashed') +
   geom_point() +
-  scale_color_manual(values = c("lightgrey", "darkgrey", "darkblue", "red"), name = "") +
+  scale_color_manual(values = c("lightgrey", "darkgrey", "blue", "red"), name = "") +
   labs(x = "log2FC", y = "-log10(p-adj)", title = "DEG Volcano Plot") +
   theme_classic() +
-  geom_text_repel(max.overlaps = 12) + 
+  geom_text_repel(max.overlaps = 12,
+                  min.segment.length = unit(0, 'lines')) + 
   theme(axis.text.y = element_text(size=12),
         axis.text.x = element_text(size=15),
         axis.title.x = element_text(size=15),
@@ -123,7 +122,7 @@ sc_enrich_bar = ggpar(sc_enrich_bar, legend = "right")
 library(gridExtra)
 figure = grid.arrange(sc_volcano, sc_enrich_bar, ncol = 2, widths = c(1, 1.1))
 #annotate figure with title
-annotate_figure(figure, top = text_grob("Summary of DGE results in fast cylcing vs G0 arrested tumor cells", size = 20, face = "bold"))
+annotate_figure(figure, top = text_grob("Summary of DGE results in fast cylcing vs G0 arrested tumour cells", size = 20, face = "bold"))
 
 
 

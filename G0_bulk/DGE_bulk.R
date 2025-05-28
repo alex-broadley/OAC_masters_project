@@ -183,47 +183,68 @@ volcano_df$Gene = rownames(volcano_df)
 
 # Create labels for DEGs based on signficance and direction of expression
 volcano_df$sig_direction = "Not significant"
-volcano_df$sig_direction[volcano_df$logfoldchanges > 0 & volcano_df$pvals_adj < 0.05] <- "Significant"
-volcano_df$sig_direction[volcano_df$logfoldchanges < 0 & volcano_df$pvals_adj < 0.05] <- "Significant"
-volcano_df$sig_direction[volcano_df$logfoldchanges > 0.5 & volcano_df$pvals_adj < 0.05] <- "Significant & log2FC > 0.05"
-volcano_df$sig_direction[volcano_df$logfoldchanges < -0.5 & volcano_df$pvals_adj < 0.05] <- "Significant & log2FC < -0.05"
+volcano_df$sig_direction[volcano_df$log2FoldChange > 0 & volcano_df$padj < 0.05] <- "Significant"
+volcano_df$sig_direction[volcano_df$log2FoldChange < 0 & volcano_df$padj < 0.05] <- "Significant"
+volcano_df$sig_direction[volcano_df$log2FoldChange > 0.5 & volcano_df$padj < 0.05] <- "Significant & log2FC > 0.05"
+volcano_df$sig_direction[volcano_df$log2FoldChange < -0.5 & volcano_df$padj < 0.05] <- "Significant & log2FC < -0.05"
 
-volcano_df$delabel = NA
+table(volcano_df$sig_direction)
+
 
 #create df of genes with highest L2FC and significant
 log2FC_high_df = volcano_df[abs(volcano_df$log2FoldChange) > 0.5, ]
 log2FC_high_df <- na.omit(log2FC_high_df)
 log2FC_high_df = log2FC_high_df[log2FC_high_df$padj < 0.05, ] 
 
-#set which genes want to label on plot - here choosing 50 with highest pvals and abs(LFC) > 0.5
+
+#set which genes want to label on plot - here choosing 20 with highest pvals and abs(LFC) > 0.5
+#also include label if one of the DGE's highlight in discussion
+volcano_df$DEGlabel = NA
+
 for (row in 1:nrow(volcano_df)) {
-  if (volcano_df$Gene[row] %in% head(log2FC_high_df[order(log2FC_high_df$padj), "Gene"], 50)){
-    volcano_df$delabel[row] = volcano_df$Gene[row]
+  if (volcano_df$Gene[row] %in% head(log2FC_high_df[order(log2FC_high_df$padj), "Gene"], 20)){
+    volcano_df$DEGlabel[row] = volcano_df$Gene[row]
   }
   else if (volcano_df$sig_direction[row] == 'Not significant'){
-    volcano_df$delabel[row] = NA
+    volcano_df$DEGlabel[row] = NA
   }
   else if (volcano_df$sig_direction[row] == 'Significant & log2FC < 0'){
-    volcano_df$delabel[row] = NA
+    volcano_df$DEGlabel[row] = NA
   }
   else if (volcano_df$sig_direction[row] == 'Significant & log2FC > 0'){
-    volcano_df$delabel[row] = NA
+    volcano_df$DEGlabel[row] = NA
   }
   else {
-    volcano_df$delabel[row] = NA
+    volcano_df$DEGlabel[row] = NA
   }
 }
 
+#find indexes of genes want to highlight for discussion
+which(volcano_df$Gene %in% c('SPARCL1'))
+which(volcano_df$Gene %in% c('RPS2'))
+which(volcano_df$Gene %in% c('FBXW7'))
+which(volcano_df$Gene %in% c('TP53'))
+which(volcano_df$Gene %in% c('TPX2'))
+which(volcano_df$Gene %in% c('COL19A1'))
+
+#manually assing DEG labels for now
+volcano_df$DEGlabel[39411] = 'SPARCL1'
+volcano_df$DEGlabel[36951] = 'RPS2'
+volcano_df$DEGlabel[19833] = 'FBXW7'
+volcano_df$DEGlabel[41357] = 'TP53'
+volcano_df$DEGlabel[41458] = 'TPX3'
+volcano_df$DEGlabel[16810] = 'COL19A1'
 
 
 #### create volcano plot 
-bulk_volcano = ggplot(data = volcano_df, aes(x = log2FoldChange, y = -log10(padj), colour = sig_direction, label = delabel)) +
+bulk_volcano = ggplot(data = volcano_df, aes(x = log2FoldChange, y = -log10(padj), colour = sig_direction, label = DEGlabel)) +
   geom_point(alpha = 0.6) +
-  geom_text_repel(max.overlaps = 15, force = 4, color = 'black') + 
+  geom_text_repel(max.overlaps = 15, force = 10, colour = 'black',
+                  min.segment.length = unit(0, 'lines')) + 
   labs(x = "log2FC", y = "-log10(p-adj)", title = "DEG Volcano Plot") +
   geom_vline(xintercept = c(-0.5, 0.5), col = "black", linetype = 'dashed') +
   geom_hline(yintercept = -log10(0.05), col = "black", linetype = 'dashed') +
-  scale_color_manual(values = c("grey", "red", "blue"), name = "Expression change") +
+  scale_color_manual(values = c("grey", "darkgrey", "blue", "red"), name = "") +
   theme_classic() +
   theme(axis.text.y = element_text(size=12),
                                            axis.text.x = element_text(size=15),
@@ -232,6 +253,7 @@ bulk_volcano = ggplot(data = volcano_df, aes(x = log2FoldChange, y = -log10(padj
                                            plot.title = element_text(family = "Helvetica", size = (15), hjust = 0.5),
                                            legend.text = element_text(size = 10))
 
+library(ggpubr)
 bulk_volcano = ggpar(bulk_volcano, legend = "top")
 
 #### Checking for DGE of differentially selected genes -------------------------------------------------------
@@ -239,6 +261,8 @@ bulk_volcano = ggpar(bulk_volcano, legend = "top")
 diff_selected_genes = c('TP53', 'CDKN2A.p16INK4a', 'SMAD4', 'SPG20', 'FBXW7', 'KRAS', 'ARID1A', 'COL19A1', 'DHX16')
 
 sig_results[rownames(sig_results) %in% diff_selected_genes,]
+
+sig_results[rownames(sig_results) %in% 'RPS2',]
 
 
 ### Creating sideways bar plot for pathway enrichment ---------------------------------------------------------
@@ -257,12 +281,12 @@ bulk_enrich_bar = ggplot(data = od[0:10,], aes(x = Term_Description, y = Fold_En
         legend.text = element_text(size = 7))
 
 #put legend at top of plot
-bulk_enrich_bar = ggpar(bulk_enrich_bar, legend = "top")
+bulk_enrich_bar = ggpar(bulk_enrich_bar, legend = "right")
 
 
 #put volcano and pathway enrich next to each other
 figure = grid.arrange(bulk_volcano, bulk_enrich_bar, ncol = 2, widths = c(1, 1))
-annotate_figure(figure, top = text_grob("Summary of DGE results in aggressive vs slowly proliferating primary tumors", size = 20, face = "bold"))
+annotate_figure(figure, top = text_grob("Summary of DGE results in aggressive vs slowly proliferating primary tumours", size = 20, face = "bold"))
 
 
 

@@ -104,7 +104,6 @@ cat(SC_important_genes, file = "SC_ML_important_genes.txt", sep = " ")
 top_20_bulk = bulk_importances[order(bulk_importances$mean_importance, decreasing = TRUE), ][1:20, ]
 top_20_sc = SC_importances[order(SC_importances$mean_importance, decreasing = TRUE), ][1:20, ]
 
-
 write.table(top_20_bulk$gene_name, file = "top_20_bulk.txt", sep = " ", row.names = FALSE, quote = FALSE)
 write.table(top_20_sc$gene_name, file = "top_20_sc", sep = " ", row.names = FALSE, quote = FALSE)
 
