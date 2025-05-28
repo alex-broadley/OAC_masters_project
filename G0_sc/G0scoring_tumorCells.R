@@ -11,8 +11,6 @@ setwd('/Users/alex/Documents/BIOL0041-Project/OAC_masters_project/data')
 #results_epi_und_noRef = read.csv('SCEVAN_results_epi_und_noRef.csv', row.names='X')
 #results_epi_normal_ref = read.csv('SCEVAN_results_epi_normal_ref.csv', row.names='X')
 #results_epi_und_ref = read.csv('SCEVAN_results_epi_und_Ref.csv', row.names='X')
-
-
 #SCEVAN_results_toUse = results_epi_und_noRef
 
 #discuss w/ Maria but seems to be identifying some of the 'normal' cells as tumor cells
@@ -41,7 +39,6 @@ names(sigs)[2] = 'G0sig.down'
 
 
 # Calculate G0 scores ----------------------------------------------------------
-
 library(GSVA)
 ## build GSVA parameter object
 gsvapar <- gsvaParam(tumor_scran_mat, sigs)
@@ -188,7 +185,6 @@ zero_Up_prop = length(sig_up0counts[which(sig_up0counts > cell_cut_off)])/length
 zero_Down_prop = length(sig_down0counts[which(sig_down0counts > cell_cut_off)])/length(sig_down0counts)
 
 ##### Dropout in genes not in the signature
-
 non_sig_counts = tumoural_cells[-which(row.names(tumoural_cells) %in% downregulated),]
 non_sig_counts = non_sig_counts[-which(row.names(non_sig_counts) %in% upregulated),]
 
@@ -207,7 +203,6 @@ barplot(nonSig_counts)
 # don't think this is really valid 
 # - expect lots of genes to be downregulated/0 across the whole genome
 # could remove genes with 100% dropout rate -> not expressed in any cells?
-
 mean(nonSig_Props)
 mean(sig_up0Props)
 
@@ -226,7 +221,6 @@ ggplot(df, aes(x = type, y = prop, fill = type)) +
   geom_bar(stat = "identity") +
   labs(title = "Mean gene dropout proportion in tumor cells", x = "Gene category", y = "Value") +
   theme_minimal()
-
 
 ## mean and sd expression level plot
 library(dplyr)

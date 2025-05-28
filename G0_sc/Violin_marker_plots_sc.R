@@ -22,7 +22,6 @@ tumor_counts$Cycle_type = str_to_sentence(tumor_counts$Cycle_type)
 tumor_counts$Cycle_type = factor(tumor_counts$Cycle_type , levels=c("Fast cycling", "Cycling", "G0 arrested"))
 tumor_counts$Cycle_type
 
-
 my_comparisons = list(c("Fast cycling", "G0 arrested"), c("G0 arrested", 'Cycling'), c("Fast cycling", "Cycling"))
 
 #MKI67 expression violin plot
