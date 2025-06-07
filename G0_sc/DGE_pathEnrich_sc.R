@@ -116,8 +116,6 @@ sc_enrich_bar = ggplot(data = od_SC[0:10,], aes(x = Term_Description, y = Fold_E
 #move legend to top of figure
 sc_enrich_bar = ggpar(sc_enrich_bar, legend = "right")
 
-
-
 #put volcano and enrichment bar chart next to each other
 library(gridExtra)
 figure = grid.arrange(sc_volcano, sc_enrich_bar, ncol = 2, widths = c(1, 1.1))
